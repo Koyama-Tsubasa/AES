@@ -1,3 +1,3 @@
 # AES
 
-It is the small C code of AES.
+It is the easy C code of AES.
