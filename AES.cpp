@@ -1,19 +1,19 @@
 #include<stdio.h>
 #include<string.h>
 
-int Cipher_Round=0;	// ¥[±K¹Bºâ°õ¦æ¦^¦X¼Æ
-int block=0;	// Æ_°Íªºblock¼Æ¶q
-int mode; // ¥[¸Ñ±K¤è¦¡
-int count=0;// °µ´X¦¸¥[¸Ñ±K
+int Cipher_Round=0;	// åŠ å¯†é‹ç®—åŸ·è¡Œå›åˆæ•¸
+int block=0;	// é‘°åŒ™çš„blockæ•¸é‡
+int mode; // åŠ è§£å¯†æ–¹å¼
+int count=0;// åšå¹¾æ¬¡åŠ è§£å¯†
 
-unsigned char input[16];	// ¥[¸Ñ±K«e¦r¦ê 
-unsigned char output[16];	// ¥[¸Ñ±K«á¦r¦ê 
-unsigned char out_CO_8[16]; // CFB-8,OFB-8 ¥[±K«á¦r¦ê 
+unsigned char input[16];	// åŠ è§£å¯†å‰å­—ä¸² 
+unsigned char output[16];	// åŠ è§£å¯†å¾Œå­—ä¸² 
+unsigned char out_CO_8[16]; // CFB-8,OFB-8 åŠ å¯†å¾Œå­—ä¸² 
 unsigned char temp[16];	
 unsigned char IV[16]; // initialization vector
-unsigned char process[4][4];	// ¥[±K¹Bºâ¹Lµ{¤¤ªºªº¯x°} 
-unsigned char Roundkey[240];	// Àx¦s¥D­nÆ_°Í¸òÂX¥RÆ_°Íªº°}¦C ( 128...176, 192...208, 256...240 )	
-unsigned char key[32];	// ¿é¤Jªº Key
+unsigned char process[4][4];	// åŠ å¯†é‹ç®—éç¨‹ä¸­çš„çš„çŸ©é™£ 
+unsigned char Roundkey[240];	// å„²å­˜ä¸»è¦é‘°åŒ™è·Ÿæ“´å……é‘°åŒ™çš„é™£åˆ— ( 128...176, 192...208, 256...240 )	
+unsigned char key[32];	// è¼¸å…¥çš„ Key
 
 int S_Box[256] = {
 	
@@ -59,7 +59,7 @@ int S_Box_Inverse[256] = {
 
 /* 
 GF(2^8) 
-KeyExpansion ·|¥Î¨ì	
+KeyExpansion æœƒç”¨åˆ°	
 */ 
 int Rcon[11] = { 
 
@@ -82,9 +82,9 @@ void KeyExpansion() {
 	
     unsigned char temp[4];
     unsigned char t;
-    int count_Round_Key = 0; // ²Ä´X­Ó round 
+    int count_Round_Key = 0; // ç¬¬å¹¾å€‹ round 
     
-    // ²Ä¤@¦^¦X Key ( 128...0~15, 192...0~23, 256...0~31 )
+    // ç¬¬ä¸€å›åˆ Key ( 128...0~15, 192...0~23, 256...0~31 )
     for (int i=0;i<block;i++) {
     	
         Roundkey[i*4] = key[i*4];
@@ -94,10 +94,10 @@ void KeyExpansion() {
         
     }
 
-    // ²£¥Í¨ä¥L¦^¦XÆ_°Í ( 128...44 words, 192...52 words, 256...60 words )
+    // ç”¢ç”Ÿå…¶ä»–å›åˆé‘°åŒ™ ( 128...44 words, 192...52 words, 256...60 words )
     for (int i=block;i<(4*(Cipher_Round+1));i++) {
     	
-    	// «e¤@­Ó word ( 4 bytes ) 
+    	// å‰ä¸€å€‹ word ( 4 bytes ) 
         for (int j=0;j<4;j++) temp[j] = Roundkey[(i-1)*4+j];
         
         if ((i%block)==0) {
@@ -115,7 +115,7 @@ void KeyExpansion() {
             temp[2] = S_Box[(int)temp[2]];
             temp[3] = S_Box[(int)temp[3]];
             
-            // ¸ò [rcon 00 00 00] XOR ( XOR³Ì¥ªÃäªºbyte )
+            // è·Ÿ [rcon 00 00 00] XOR ( XORæœ€å·¦é‚Šçš„byte )
             temp[0] ^= Rcon[i/block]; 
             
         }
@@ -130,7 +130,7 @@ void KeyExpansion() {
             
         }
         
-        // ¸ò«e block*4 ªº byte XOR ( ex: if 128... roundkey[16] = roundkey[0]^temp[0] ) 
+        // è·Ÿå‰ block*4 çš„ byte XOR ( ex: if 128... roundkey[16] = roundkey[0]^temp[0] ) 
         Roundkey[i*4+0] = Roundkey[count_Round_Key*4+0]^temp[0];
         Roundkey[i*4+1] = Roundkey[count_Round_Key*4+1]^temp[1];
         Roundkey[i*4+2] = Roundkey[count_Round_Key*4+2]^temp[2];
@@ -145,12 +145,12 @@ void KeyExpansion() {
 /* AddRoundKey */
 void AddRoundKey(int round) {
     
-	// ¬İround¨Ó¨Ï¥Îkey ( ¤@­Ó round = 16 bytes )
+	// çœ‹roundä¾†ä½¿ç”¨key ( ä¸€å€‹ round = 16 bytes )
     for (int i=0;i<4;i++) {
     	
     	for (int j=0;j<4;j++) process[j][i] ^= Roundkey[(i*4+j)+(round*16)]; 	
     	
-	}
+    }
             
 }
 
@@ -161,7 +161,7 @@ void Sub_S_Box() {
     	
     	for (int j=0;j<4;j++) process[i][j] = S_Box[process[i][j]];
     	
-	}
+    }
         
 }
 
@@ -172,7 +172,7 @@ void Sub_S_Box_Inv() {
     	
     	for (int j=0;j<4;j++) process[i][j] = S_Box_Inverse[process[i][j]];
     	
-	}
+    }
         
 }
 
@@ -181,14 +181,14 @@ void ShiftRows() {
 	
     unsigned char temp;
     
-    // 2nd row ( ¥ª²¾ 1 ­Ó )
+    // 2nd row ( å·¦ç§» 1 å€‹ )
     temp    = process[1][0];
     process[1][0] = process[1][1];
     process[1][1] = process[1][2];
     process[1][2] = process[1][3];
     process[1][3] = temp;
 
-    // 3th row ( ¥ª²¾ 2 ­Ó ) 
+    // 3th row ( å·¦ç§» 2 å€‹ ) 
     temp    = process[2][0];
     process[2][0] = process[2][2];
     process[2][2] = temp;
@@ -196,7 +196,7 @@ void ShiftRows() {
     process[2][1] = process[2][3];
     process[2][3] = temp;
 
-    // 4th row ( ¥ª²¾ 3 ­Ó ) 
+    // 4th row ( å·¦ç§» 3 å€‹ ) 
     temp    = process[3][0];
     process[3][0] = process[3][3];
     process[3][3] = process[3][2];
@@ -210,14 +210,14 @@ void ShiftRows_Inv() {
 	
     unsigned char temp;
     
-    // 2nd row ( ¥k²¾ 1 ­Ó ) 
+    // 2nd row ( å³ç§» 1 å€‹ ) 
     temp    = process[1][3];
     process[1][3] = process[1][2];
     process[1][2] = process[1][1];
     process[1][1] = process[1][0];
     process[1][0] = temp;
 
-    // 3th row ( ¥k²¾ 2 ­Ó ) 
+    // 3th row ( å³ç§» 2 å€‹ ) 
     temp    = process[2][0];
     process[2][0] = process[2][2];
     process[2][2] = temp;
@@ -225,7 +225,7 @@ void ShiftRows_Inv() {
     process[2][1] = process[2][3];
     process[2][3] = temp;
 
-    // 4th row ( ¥k²¾ 3 ­Ó ) 
+    // 4th row ( å³ç§» 3 å€‹ ) 
     temp    = process[3][0];
     process[3][0] = process[3][1];
     process[3][1] = process[3][2];
@@ -235,10 +235,10 @@ void ShiftRows_Inv() {
 }
 
 /*
-shift XOR ­¼ªk 
+shift XOR ä¹˜æ³• 
 (x << 1)  shift 1 bit
-(x >> 7)  ²Ä8­Óbit
-(x >> 7) & 0x01 ÀË¬d²Ä8­Óbit¬O§_¬° 1 
+(x >> 7)  ç¬¬8å€‹bit
+(x >> 7) & 0x01 æª¢æŸ¥ç¬¬8å€‹bitæ˜¯å¦ç‚º 1 
 0x1b = 0001 1011 ( x^4 + x^3 + x + 1 )
 */
 unsigned char SXOR(unsigned char x) {
@@ -320,10 +320,10 @@ void MixColumns_Inv() {
     
 }
 
-/* ¥[±K */
+/* åŠ å¯† */
 void Encryption() {
     
-    // input Âà´«¦¨ column «¬¦¡ 
+    // input è½‰æ›æˆ column å‹å¼ 
     for (int i=0;i<4;i++) {
     	
     	for (int j=0;j<4;j++) {
@@ -331,9 +331,9 @@ void Encryption() {
         	if(mode==0 || mode==1) process[j][i] = input[i*4+j];
         	else if (mode==3 || mode==5 || mode==6) process[j][i] = IV[i*4+j];
         	
-		}
-    	
 	}
+    	
+    }
     
     AddRoundKey(0);
     
@@ -344,14 +344,14 @@ void Encryption() {
    			
    			for (int j=0;j<4;j++) {
    				
-    			if (count==1) process[j][i] ^= IV[i*4+j];
-    			else process[j][i] ^= output[i*4+j];
+    				if (count==1) process[j][i] ^= IV[i*4+j];
+    				else process[j][i] ^= output[i*4+j];
     			
 			}
    			
 		}
 			
-	}
+    }
 	
     for (int round=1;round<Cipher_Round;round++) {
 			
@@ -370,24 +370,24 @@ void Encryption() {
     	
     	for(int j=0;j<4;j++) output[i*4+j]=process[j][i];
     	
-	}
+    }
         
     
 }
 
-/* ¸Ñ±K */
+/* è§£å¯† */
 void Decryption() {
     
-    // input Âà´«¦¨ column «¬¦¡ 
+    // input è½‰æ›æˆ column å‹å¼ 
     for (int i=0;i<4;i++) {
     	
     	for (int j=0;j<4;j++) {
         	
         	if(mode==0 || mode==1) process[j][i] = input[i*4+j];
         	
-		}
-    	
 	}
+    	
+    }
     
     AddRoundKey(Cipher_Round);
 
@@ -404,31 +404,31 @@ void Decryption() {
     Sub_S_Box_Inv();
     AddRoundKey(0);
 
-	//CBC
-	if (mode==1) {
-		
-    	for (int i=0;i<4;i++)  {
-    		
-    		for (int j=0;j<4;j++) {
-    			
-    			if (count==1) process[j][i] ^= IV[i*4+j];
-    			else process[j][i] ^= temp[i*4+j];
-    			
-			}
-    		
-		}
-		
-	}
+    //CBC
+    if (mode==1) {
+
+    for (int i=0;i<4;i++)  {
+
+	    for (int j=0;j<4;j++) {
+
+			    if (count==1) process[j][i] ^= IV[i*4+j];
+			    else process[j][i] ^= temp[i*4+j];
+
+		    }
+
+	    }
+
+    }
 	
     for(int i=0;i<4;i++)  {
     	
     	for(int j=0;j<4;j++) output[i*4+j]=process[j][i];
     	
-	}
+    }
         
 }
 
-/* ÀË¬d¿é¤J character ¥¿½T©ó§_ */
+/* æª¢æŸ¥è¼¸å…¥ character æ­£ç¢ºæ–¼å¦ */
 int Input(unsigned char *inputArray, int num) {
 	
 	char check[num];
@@ -440,12 +440,12 @@ int Input(unsigned char *inputArray, int num) {
 		scanf("%c",&inputArray[cha]);
 		check[cha] = inputArray[cha];
 		
-		// ÀË¬d¿é¤Jªº character ¬O§_¬° enter Áä 
+		// æª¢æŸ¥è¼¸å…¥çš„ character æ˜¯å¦ç‚º enter éµ 
 		if (inputArray[cha]=='\n') return 0;
 					
 	}
 	
-	// ÀË¬d¦³¨S¦³¶W¹L character ¼Æ¶q 
+	// æª¢æŸ¥æœ‰æ²’æœ‰è¶…é character æ•¸é‡ 
 	while (true) {
 		
 		scanf("%c",&check_again);
@@ -464,12 +464,12 @@ int Input(unsigned char *inputArray, int num) {
 int main () {
 	
 	int EoD; // encryption or decryption 
-	int check; // ÀË¬d¿é¤Jªº character ¬O§_¥¿½T 
-	char enter; // ¦Y enter Áä 
-	char c; // §ì¬İ¬İ file ¸Ì¤U¤@­Ó¬O§_¦³ character
+	int check; // æª¢æŸ¥è¼¸å…¥çš„ character æ˜¯å¦æ­£ç¢º 
+	char enter; // åƒ enter éµ 
+	char c; // æŠ“çœ‹çœ‹ file è£¡ä¸‹ä¸€å€‹æ˜¯å¦æœ‰ character
 	int Key_size=0;
-	int flag=0; // ¬İ file ¸ÌÁÙ¦³¨S¦³ character 
-	unsigned char input_key[32]; // ¦s key 
+	int flag=0; // çœ‹ file è£¡é‚„æœ‰æ²’æœ‰ character 
+	unsigned char input_key[32]; // å­˜ key 
 	
 	while (true) {
 		
@@ -483,7 +483,7 @@ int main () {
 	
 	while (true) {
 		
-		printf("\n¿ï¾Ü¼Ò¦¡\n( ECB: 0  CBC: 1  CFB-1: 2  CFB-8: 3  OFB-1: 4  OFB-8: 5  CTR: 6  ):");
+		printf("\né¸æ“‡æ¨¡å¼\n( ECB: 0  CBC: 1  CFB-1: 2  CFB-8: 3  OFB-1: 4  OFB-8: 5  CTR: 6  ):");
 		scanf("%d",&mode);
 		scanf("%c",&enter);
 	
@@ -497,13 +497,13 @@ int main () {
 		
 			while (true) {
 				
-				printf("\n¿é¤J Initialization Vector ( 16 characters ):");
+				printf("\nè¼¸å…¥ Initialization Vector ( 16 characters ):");
 				
 				check = Input(IV,16);
 				
 				if (check==0) {
 					
-					printf("\n[ ½Ğ¿é¤J«ü©w character ¼Æ ]\n\n");
+					printf("\n[ è«‹è¼¸å…¥æŒ‡å®š character æ•¸ ]\n\n");
 					continue;
 					
 				}
@@ -520,95 +520,95 @@ int main () {
 	if (EoD==1) printf("\n~ AES Encryption ~\n");
 	else printf("\n~ AES Decryption ~\n");
 		
-    while (true) {
+        while (true) {
     	
-        printf("¿é¤J AES key size ( 128 , 192 , 256) : ");
-        scanf("%d",&Key_size);
-        scanf("%c",&enter);
+        	printf("è¼¸å…¥ AES key size ( 128 , 192 , 256) : ");
+        	scanf("%d",&Key_size);
+        	scanf("%c",&enter);
         
-        if (Key_size!=128 && Key_size!=192 && Key_size!=256) printf("\n[ Please enter 128 , 192 or 256 ]\n\n");
-        else break;
+        	if (Key_size!=128 && Key_size!=192 && Key_size!=256) printf("\n[ Please enter 128 , 192 or 256 ]\n\n");
+        	else break;
         
   	}
 				
-	block=Key_size/32; // key block¼Æ¶q¡@( 128...4, 192...6, 256...8 ) 
-    Cipher_Round=block+6; // ¦^©M¼Æ 
+	block=Key_size/32; // key blockæ•¸é‡ã€€( 128...4, 192...6, 256...8 ) 
+        Cipher_Round=block+6; // å›å’Œæ•¸ 
 
-    while (true) {
+        while (true) {
     	
-    	if (Key_size==128) {
+    		if (Key_size==128) {
     
-   			printf("\n¿é¤J AES KEY (16 characters) : ");
-       		check = Input(key,16);
+   			printf("\nè¼¸å…¥ AES KEY (16 characters) : ");
+       			check = Input(key,16);
            	
    		}
     
    		else if (Key_size==192) {
    		
-       		printf("\n¿é¤J AES KEY (24 characters) : ");
-       		check = Input(key,24);
+			printf("\nè¼¸å…¥ AES KEY (24 characters) : ");
+			check = Input(key,24);
            	
    		}
     	
    		else if (Key_size==256) { 
    	
-       		printf("\n¿é¤J AES KEY (32 characters) : ");
-       		check = Input(key,32);
+			printf("\nè¼¸å…¥ AES KEY (32 characters) : ");
+			check = Input(key,32);
            	
    		}
     
-    	if (check==1) break; 
-    	else printf("\n[ ½Ğ¿é¤J«ü©w character ¼Æ ]\n\n");
+    		if (check==1) break; 
+    		else printf("\n[ è«‹è¼¸å…¥æŒ‡å®š character æ•¸ ]\n\n");
     	
 	}
 	
-    KeyExpansion();
+        KeyExpansion();
     
-    // ¥[±K 
-    if (EoD==1) {
+        // åŠ å¯† 
+        if (EoD==1) {
     	
-    	char file[30];
-    	FILE *fp,*wp;
+		char file[30];
+		FILE *fp,*wp;
     	
-    	while (true) {
+    		while (true) {
     		
-    		printf("\n¿é¤J plaintext file name => ");
-    		scanf("%s", &file);
+			printf("\nè¼¸å…¥ plaintext file name => ");
+			scanf("%s", &file);
     	
-    		// §ä file 
-    		if ((fp=fopen(file,"rb"))==NULL) {
+			// æ‰¾ file 
+			if ((fp=fopen(file,"rb"))==NULL) {
     		
-        		printf("\n[ §ä¤£¨ì¦¹ÀÉ®× ]\n");
-        		continue;
+				printf("\n[ æ‰¾ä¸åˆ°æ­¤æª”æ¡ˆ ]\n");
+				continue;
         	
-    		}
+    			}
     		
-    		break;
+    			break;
     		
 		}
 
-    	printf("\n¿é¤J Ciphertext file name => "); 
-    	scanf("%s",&file); 
-    	wp=fopen(file,"wb");
-    	flag=1;
+		printf("\nè¼¸å…¥ Ciphertext file name => "); 
+		scanf("%s",&file); 
+		wp=fopen(file,"wb");
+		flag=1;
     	
-    	while(flag==1) { 
+    		while(flag==1) { 
     	
-    		count++; //²Ä´X¦¸¥[±K
-        
-        	for (int c=0;c<16;c++) {
-        		
-            	input[c] = fgetc(fp); // ±q file §ì¤@­Ó character 
-				
-				// ³Ì«áÅª¨ú®É³Ñ¤Uªº°}¦C¤º®e³]¬° 0 
-            	if (feof(fp)) {
-            		
-                	for (int padding = c;padding<16;padding++) input[padding] = 0x00;
-                	
-                	flag = 0; // ªí¥Ü file ¸Ì character ¥H§ì§¹ 
-            	}
+			count++; //ç¬¬å¹¾æ¬¡åŠ å¯†
+
+			for (int c=0;c<16;c++) {
+
+				input[c] = fgetc(fp); // å¾ file æŠ“ä¸€å€‹ character 
+
+						// æœ€å¾Œè®€å–æ™‚å‰©ä¸‹çš„é™£åˆ—å…§å®¹è¨­ç‚º 0 
+				if (feof(fp)) {
+
+					for (int padding = c;padding<16;padding++) input[padding] = 0x00;
+
+					flag = 0; // è¡¨ç¤º file è£¡ character ä»¥æŠ“å®Œ 
+				}
             	
-        	}
+        		}
 			
 			// CFB-8 
 			if (mode==3) {
@@ -618,9 +618,9 @@ int main () {
 					Encryption();
 					temp[0] = output[0];
 					temp[0] ^= input[i];
-					out_CO_8[i] = temp[0]; // ¥u«O¯d³Ì¥ªÃä  1 byte ( 8 bits ) 
+					out_CO_8[i] = temp[0]; // åªä¿ç•™æœ€å·¦é‚Š  1 byte ( 8 bits ) 
 					
-					// ·s IV 
+					// æ–° IV 
 					for (int j=0;j<15;j++) IV[j] = IV[j+1];
 					
 					IV[15] = temp[0];
@@ -636,192 +636,192 @@ int main () {
 					Encryption();
 					temp[0] = output[0];
 					
-					// ·s IV 
+					// æ–° IV 
 					for (int j=0;j<15;j++) IV[j] = IV[j+1];
 					
 					IV[15] = temp[0];
 					
 					temp[0] ^= input[i];
-					out_CO_8[i] = temp[0]; // ¥u«O¯d³Ì¥ªÃä  1 byte ( 8 bits )  
+					out_CO_8[i] = temp[0]; // åªä¿ç•™æœ€å·¦é‚Š  1 byte ( 8 bits )  
 					
 				}
 				
 			}
-        	else Encryption(); 
+        		else Encryption(); 
         	
-        	// CTR 
-        	if (mode==6) {
-        		
-        		for (int i=15;i>=0;i--) {
-        			
-        			// ¶i¦ì 
-        			if (IV[i]==255) {
-        				
-        				IV[i] == 0;
-						continue;	
-						
-					}
-					
-					IV[i]++; //counter + 1
-					
-				}
-				
-   				for (int i=0;i<16;i++) output[i] ^= input[i];
-   				
-			}
-        	
-    		// ±K¤å¿é¥X¨ìÀÉ®×¤W
-        	for(int c=0;c<16;c++)  {
-        		
-        		if (mode==3 || mode==5) fprintf(wp,"%c",out_CO_8[c]);
-        		else fprintf(wp,"%c",output[c]);
-        		
-			}
-        	
-    		if ((c=fgetc(fp))==EOF) flag = 0;
-    		else ungetc(c, fp);
-    	
-		}
-		
-		fclose(fp);
-    	rewind(wp);
-    	fclose(wp);
-		
-	}
-	
-	// ¸Ñ±K 
-	else {
-		
-		char file[50];
-		FILE *fp,*wp;
-		
-    	while (true) {
-    		
-    		printf("\n¿é¤J Ciphertext file name => ");
-    		scanf("%s",&file);
-    	
-    		// §ä file 
-    		if ((fp = fopen(file,"rb"))==NULL) {
-    		
-        		printf("\n[ §ä¤£¨ì¦¹ÀÉ®× ]\n");
-        		continue;
-        	
-    		}
-    		
-    		break;
-    		
-		}
-
-    	printf("\n¿é¤J Plaintext file name  => "); 
-    	scanf("%s", &file); 
-    	wp = fopen(file,"wb");
-    	flag = 1;
-    	
-    	while(flag==1) {
-    		
-    		count++; //²Ä´X¦¸¸Ñ±K
-    		
-    		if (mode==1) for (int i=0;i<16;i++) temp[i] = input[i];
-       	
-        	for (int c=0;c<16;c++) input[c] = fgetc(fp);
-        	
-        	// CFB-8 
-        	if (mode==3) {
-        		
-				for (int i=0;i<16;i++) {
-					
-					Encryption();
-					temp[0] = input[i];
-					
-					// ·s IV 
-					for (int j=0;j<15;j++) IV[j] = IV[j+1];
-					
-					IV[15] = temp[0];
-					
-					temp[0] ^= output[0];
-					out_CO_8[i] = temp[0]; // ¥u«O¯d³Ì¥ªÃä  1 byte ( 8 bits )  
-					
-				}
-				
-			}
-			// OFB-8
-			else if (mode==5) {
-				
-				for (int i=0;i<16;i++) {
-					
-					Encryption();
-					temp[0] = output[0];
-					
-					// ·s IV 
-					for (int j=0;j<15;j++) IV[j] = IV[j+1];
-					
-					IV[15] = temp[0];
-					
-					temp[0] ^= input[i];
-					out_CO_8[i] = temp[0]; // ¥u«O¯d³Ì¥ªÃä  1 byte ( 8 bits )  
-					
-				}
-				
-			}
 			// CTR 
-			else if (mode==6) {
-				
-				Encryption();
-				
-        		for (int i=15;i>=0;i--) {
+			if (mode==6) {
+
+				for (int i=15;i>=0;i--) {
         			
-        			// ¶i¦ì 
-        			if (IV[i]==255) {
-        				
-        				IV[i] == 0;
-						continue;
-							
+					// é€²ä½ 
+					if (IV[i]==255) {
+
+						IV[i] == 0;
+							continue;	
+
+						}
+
+						IV[i]++; //counter + 1
+
 					}
-					
-					IV[i]++; //counter + 1
-					
+
+					for (int i=0;i<16;i++) output[i] ^= input[i];
+
 				}
-				
-   				for (int i=0;i<16;i++) output[i] ^= input[i];
-   				
-			}
-        	else Decryption(); 
         	
-        	for (int c=0;c<16;c++) {
+				// å¯†æ–‡è¼¸å‡ºåˆ°æª”æ¡ˆä¸Š
+				for(int c=0;c<16;c++)  {
+
+					if (mode==3 || mode==5) fprintf(wp,"%c",out_CO_8[c]);
+					else fprintf(wp,"%c",output[c]);
+
+					}
+
+				if ((c=fgetc(fp))==EOF) flag = 0;
+				else ungetc(c, fp);
+    	
+			}
+		
+			fclose(fp);
+			rewind(wp);
+			fclose(wp);
+
+		}
+	
+		// è§£å¯† 
+		else {
+
+			char file[50];
+			FILE *fp,*wp;
+		
+    			while (true) {
+    		
+				printf("\nè¼¸å…¥ Ciphertext file name => ");
+				scanf("%s",&file);
+
+				// æ‰¾ file 
+				if ((fp = fopen(file,"rb"))==NULL) {
+
+					printf("\n[ æ‰¾ä¸åˆ°æ­¤æª”æ¡ˆ ]\n");
+					continue;
+
+				}
+
+				break;
+    		
+			}
+
+			printf("\nè¼¸å…¥ Plaintext file name  => "); 
+			scanf("%s", &file); 
+			wp = fopen(file,"wb");
+			flag = 1;
+
+			while(flag==1) {
+
+				count++; //ç¬¬å¹¾æ¬¡è§£å¯†
+
+				if (mode==1) for (int i=0;i<16;i++) temp[i] = input[i];
+
+				for (int c=0;c<16;c++) input[c] = fgetc(fp);
+
+				// CFB-8 
+				if (mode==3) {
         		
-            	// ³B²z«á­±ªÅ¥Õ¦r 
-            	if (output[c]==0x00 && (mode==0 || mode==1) ) {
-            		
-                	flag = 0;
-                	break;
-                	
-            	}
-            	else if (out_CO_8[c]==0x00 && (mode==3 || mode==5) ) {
-            		
-            		flag = 0;
-                	break;
-                	
+					for (int i=0;i<16;i++) {
+
+						Encryption();
+						temp[0] = input[i];
+
+						// æ–° IV 
+						for (int j=0;j<15;j++) IV[j] = IV[j+1];
+
+						IV[15] = temp[0];
+
+						temp[0] ^= output[0];
+						out_CO_8[i] = temp[0]; // åªä¿ç•™æœ€å·¦é‚Š  1 byte ( 8 bits )  
+
+					}
+				
+				}
+				// OFB-8
+				else if (mode==5) {
+
+					for (int i=0;i<16;i++) {
+
+						Encryption();
+						temp[0] = output[0];
+
+						// æ–° IV 
+						for (int j=0;j<15;j++) IV[j] = IV[j+1];
+
+						IV[15] = temp[0];
+
+						temp[0] ^= input[i];
+						out_CO_8[i] = temp[0]; // åªä¿ç•™æœ€å·¦é‚Š  1 byte ( 8 bits )  
+
+					}
+
+				}
+				// CTR 
+				else if (mode==6) {
+
+					Encryption();
+
+					for (int i=15;i>=0;i--) {
+
+						// é€²ä½ 
+						if (IV[i]==255) {
+
+							IV[i] == 0;
+								continue;
+
+						}
+
+						IV[i]++; //counter + 1
+
+					}
+
+					for (int i=0;i<16;i++) output[i] ^= input[i];
+
+				}
+				else Decryption(); 
+        	
+				for (int c=0;c<16;c++) {
+
+				// è™•ç†å¾Œé¢ç©ºç™½å­— 
+				if (output[c]==0x00 && (mode==0 || mode==1) ) {
+
+					flag = 0;
+					break;
+
+				}
+				else if (out_CO_8[c]==0x00 && (mode==3 || mode==5) ) {
+
+					flag = 0;
+					break;
+
 				}
             
-            	if (mode==3 || mode==5) fprintf(wp,"%c",out_CO_8[c]);
-            	else fprintf(wp,"%c",output[c]);
+				if (mode==3 || mode==5) fprintf(wp,"%c",out_CO_8[c]);
+				else fprintf(wp,"%c",output[c]);
             	
-        	}
+        		}
         	
-    		if ((c = fgetc(fp)) == EOF) flag = 0;
-    		else ungetc(c, fp);
+			if ((c = fgetc(fp)) == EOF) flag = 0;
+			else ungetc(c, fp);
     		
 		}
 		
 		fclose(fp);
-    	rewind(wp);
-    	fclose(wp);
+		rewind(wp);
+		fclose(wp);
 	
 	}
     
-    if (EoD == 1) printf("\nEncryption process success !! \n");
-    else printf("\nDecryption process success !! \n");
+    	if (EoD == 1) printf("\nEncryption process success !! \n");
+    	else printf("\nDecryption process success !! \n");
     
-    return 0;
+    	return 0;
 	
 }
